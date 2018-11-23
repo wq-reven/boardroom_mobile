@@ -1,0 +1,106 @@
+.n_selectBox {
+  background-color: #fff;
+  height: 35px;
+  position: relative;
+  border-radius: 2px;
+}
+.click_change{
+ background-color: #1890ff;
+ height: 35px;
+ position: relative;
+   border-radius: 2px;
+}
+.select_disabled{
+   background-color: #999;
+   height: 35px;
+   position: relative;
+     border-radius: 2px;
+}
+.ant-spin-loading {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.load-blur {
+  filter: blur(1.8px);
+}
+
+.ant-spin-box {
+  position: fixed;
+  left: 0;
+  top: 300px;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  text-align: center;
+}
+
+.ant-spin-box .ant-spin-a {
+  display: block;
+  margin-top: 5px;
+  color: #1890ff;
+}
+
+.ant-spin-dot {
+  position: relative;
+  display: inline-block;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  z-index: 99;
+}
+
+.ant-spin-dot-spin {
+  transform: rotate(45deg);
+  animation: antRotate 1.2s infinite linear;
+}
+
+.ant-spin-dot i {
+  width: 9px;
+  height: 9px;
+  border-radius: 100%;
+  background-color: #1890ff;
+  transform: scale(1.2);
+  display: block;
+  position: absolute;
+  opacity: 0.3;
+  animation: antSpinMove 1s infinite linear alternate;
+  transform-origin: 50% 50%;
+}
+
+@keyframes antSpinMove {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes antRotate {
+  to {
+    transform: rotate(405deg);
+  }
+}
+
+.ant-spin-dot i:nth-child(1) {
+  left: 0;
+  top: 0;
+}
+
+.ant-spin-dot i:nth-child(2) {
+  right: 0;
+  top: 0;
+  animation-delay: 0.4s;
+}
+
+.ant-spin-dot i:nth-child(3) {
+  right: 0;
+  bottom: 0;
+  animation-delay: 0.8s;
+}
+
+.ant-spin-dot i:nth-child(4) {
+  left: 0;
+  bottom: 0;
+  animation-delay: 1.2s;
+}

@@ -1,0 +1,51 @@
+.container {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        width: 980px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        width: 1170px;
+    }
+}
+
+.title{
+    text-align: center;
+    padding-bottom:  1px;
+}
+
+.imgbox{
+    width: 100%;
+    height: auto;
+}
+.imgbox img{
+    width: 100%;
+    height: auto;
+}
+.ctime{
+    display: flex;
+    text-align: left;
+    align-items: baseline
+}
+.orderroom_main{
+    /* background: #efeff4 */
+}
+.empty_order{
+    margin-top: 180px;
+    font-size: 20px;
+    text-align: center
+}

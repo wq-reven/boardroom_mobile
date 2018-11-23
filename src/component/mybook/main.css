@@ -1,0 +1,38 @@
+.Login_title {
+    padding: 2.5rem 0 2.3rem;
+    background-color: #33A3F4
+}
+
+.Login_btn {
+    float: left;
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    margin-left: 1.8rem;
+    background-color: #fff;
+    line-height: 5.5rem
+}
+.Login_btn img{
+    width: 100%
+}
+.login_content {
+    float: left;
+    height: 5.5rem;
+    line-height: 5.5rem;
+    margin-left: 1.2rem;
+    font-size: 1.4rem;
+    color: #fff
+}
+
+.login_title_right {
+    height: 5.5rem;
+    float: right;
+}
+
+.right_content {
+    display: block;
+    margin: 1.7rem 1rem 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: url('./image/arrow-r.svg') no-repeat center 90%;
+}

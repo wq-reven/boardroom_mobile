@@ -1,0 +1,87 @@
+.container {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+.re_imgbox {
+    width: 100%;
+    margin: auto;
+    position: relative;
+}
+.roomtags{
+    position: absolute;
+    top: 4px;
+    left: 2px;
+}
+.roomtags span{
+    background: green;
+    color: aliceblue;
+    padding: 2px 3px;
+    display: inline-block;
+    margin-right: 10px;
+    border-radius: 5px;
+    font-size: 12px
+}
+.re_imgbox img {
+    width: 100%;
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        width: 980px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        width: 1170px;
+    }
+}
+
+.title {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.listli {
+    width: 50%;
+    display: inline-block
+}
+.hide{
+    display: none
+}
+
+
+.my-drawer {
+    position: relative;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.my-drawer .am-drawer-sidebar {
+    background-color: #fff;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.my-drawer .am-drawer-sidebar .am-list {
+    width: 300px;
+    padding: 0;
+}
+.select_drawer .am-drawer-sidebar {
+    z-index: 1999 !important
+}
+.select_drawer .am-drawer-overlay {
+    z-index: 1000 !important
+}
+.am-drawer.am-drawer-right .am-drawer-draghandle{
+    width: 0 !important
+}
