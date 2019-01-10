@@ -1,22 +1,31 @@
-import {
-    observable,
-    computed,
-    action
-} from "mobx";
-import {
-    APIHOST
-} from '../utils/util';
+import { observable,computed,action} from "mobx";
+import { APIHOST } from '../utils/util';
 import request from '../utils/request';
 import moment from 'moment';
 
 const urls = {
-    getAPPOInfo: APIHOST + 'appo/queryAppoInfo'
+    getAPPOInfo: APIHOST + 'appo/queryAppoInfo',
+    queryAppoInfoDetail: APIHOST + 'appo/queryAppoInfoDetail',
+    addAppoInfo: APIHOST + 'appo/addAppo',
+    deleteAppo: APIHOST + 'appo/deleteAppo',
+    judgeAppoConflict: APIHOST + 'appo/judgeAppoConflict',
 };
 
 class Appo {
-    @observable appoInfo = []
-    @observable countTime = [
-        {
+   
+    @observable roomdata = [];
+    @observable appoInfo = [];
+    @observable userOrderInfo = {};
+    @observable mainType = 'recommend';
+    @observable drawerStatus = false;
+    @observable viewVisible = false;
+    @observable isShowLoading = false;
+    @observable isselect = true;
+    @observable searchValue = {}
+    @observable sortValue = {}
+    @observable myorderInfo = []
+    @observable countRoomdata = []
+    @observable countTime = [{
             key: '1',
             time: "9:00"
         },
@@ -93,84 +102,222 @@ class Appo {
             time: "18:00"
         },
     ];
-    @action.bound
-    async getAppoInfoByTime() {
-        try {
-            let date = new Date().setHours(6, 0, 0, 0);
-            let starttime = moment(date).format().substr(0, 10);
-            let endtime = moment(date + 60 * 60 * 1000 * 24 * 5).format().substr(0, 10);
-            let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"702B02","date":["${starttime}","${endtime}"]},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
-            console.log(result.docs)
-        } catch (error) {
 
+    // 计算属性
+    @computed get roominfo() {
+        return this.roomdata.slice()
+    }
+    @computed get returnuserOrderInfo() {
+        return this.userOrderInfo.slice()
+    }
+
+    @action.bound
+
+    /**
+     *
+     * 生成详情页复选框数据
+     * @memberof Room
+     */
+    setAppoData() {
+        let Alldata = [];
+        let timedata = {};
+        let datedata = [];
+        let todadate = {};
+        for (let i = 0, len = this.appoInfo.length; i < len; i++) {
+            datedata = []
+            for (let j = 0, clen = this.countTime.length - 1; j < clen; j++) {
+                timedata = {};
+                let countTime = this.countTime;
+                let c_time = this.countTime[j].time
+                let c_timearr = c_time.split(':');
+                let d = Date.parse(new Date(this.appoInfo[i].date));
+                let count_time = d + (Number(c_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(c_timearr[1])) * 60 * 1000;
+                if (this.appoInfo[i].time.includes(countTime[j].time)) {
+                    timedata = {
+                        key: i + this.countTime[j].key,
+                        time: this.countTime[j].time,
+                        value: this.appoInfo[i].date,
+                        status: "1",
+                        uid: this.appoInfo[i].uidobj[this.countTime[j].time] || ''
+                    }
+                } else {
+                    if (Date.parse(new Date()) < count_time) {
+                        timedata = {
+                            key: i + this.countTime[j].key,
+                            k_id: this.countTime[j].key,
+                            time: this.countTime[j].time,
+                            value: this.appoInfo[i].date,
+                            status: "0",
+                            uid: ''
+                        }
+                    } else {
+                        timedata = {
+                            key: i + this.countTime[j].key,
+                            k_id: this.countTime[j].key,
+                            time: this.countTime[j].time,
+                            value: this.appoInfo[i].date,
+                            status: "2",
+                            uid: ''
+                        }
+                    }
+                }
+                datedata.push(timedata)
+            }
+            todadate = {
+                value: this.appoInfo[i].date,
+                time: datedata
+            }
+            Alldata.push(todadate);
+        }
+        this.countRoomdata = Alldata;
+    }
+    
+    /**
+     *
+     * 获取预约信息(我的预约页)
+     * @param {*} title
+     * @memberof Room
+     */
+    async getAppoInfoByParam(title) {
+        try {
+            this.isShowLoading = true;
+            title = title === undefined ? '' : title;
+            const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+            let uid = userInfo.uid;
+            let result = await request(urls.getAPPOInfo + `?body={"querys":{"uid":"${uid}","title":"${title}"},"sort":{"key":"createTime","order":"desc"},"pagination":{"current":1,"pageSize":100}}`);
+            this.myorderInfo = result.docs;
+        } catch (error) {
+            throw error;
+        } finally {
+            this.isShowLoading = false;
+        }
+    }
+
+    /**
+     *
+     * 获取预约信息（详情页点击已预订时刻事件）
+     * @param {*} roomId
+     * @param {*} date
+     * @param {*} time
+     * @memberof Room
+     */
+    async getAppoInfoByTime(roomId, date, time) {
+        try {
+            let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":["${date}","${date}"],"appoTime":"${time}"},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
+            this.userOrderInfo = result.docs[0];
+        } catch (error) {
+            throw error;
         } finally {
 
         }
     }
+    /**
+     *
+     * 获取预约信息（详情页）
+     * @param {*} roomId
+     * @memberof Room
+     */queryAppoInfoDetail
     async getAppoInfo(roomId) {
         try {
-            let date = new Date().setHours(6, 0, 0, 0);
-            let arr = [];
-            let appotime = ""
-            for (let i = 0; i < 7; i++) {
-                appotime = moment(date).format().substr(0, 10)
-                let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":"${appotime}"},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
-                let day = {}
-                let daytime = []
-                if (result.docs != "") {
-                    result.docs.map(item => {
-                        daytime = [...daytime, ...item.appoTime]
-                    })
-                    day = {
-                        date: result.docs[0].date,
-                        time: daytime
-                    }
-                } else {
-                    day = {
-                        date: moment(date).format().substr(0, 10),
-                        time: []
-                    }
-                }
-                arr.push(day)
-                date = date + 60 * 60 * 1000 * 24;
-            }
-            console.log(arr)
-            this.appoInfo = arr
+            this.isShowLoading = true;
+            let result = await request(urls.queryAppoInfoDetail + '?body=' + encodeURIComponent(JSON.stringify({
+                roomId: roomId
+            })));
+            this.appoInfo = result;
+            this.setAppoData();
         } catch (error) {
-            console.log(error)
+            throw error;
+        } finally {
+            this.isShowLoading = false;
         }
     }
-    setdata() {
-    
-         let Alldata = [];
-         let timedate = {};
-         let datedata = [];
-         let todadate = {};
-        for (let i = 0, len = this.appoInfo.length; i < len; i++) {
-             datedata = []
-             for (let j = 0; j < this.countTime.length - 1; j++) {
-                 console.log(this.countTime[j])
-                //  timedate = {}
-                //  timedate = {
-                //      key: this.countTime[j].key,
-                //      time: this.countTime[j].time,
-                //      id: this.date[i].id,
-                //      value: this.date[i].value,
-                //      status: this.randomNum()
-                //  }
-                //  datedata.push(timedate)
-             }
-            //  todadate = {
-            //      id: this.date[i].id,
-            //      value: this.date[i].value,
-            //      time: datedata
-            //  }
-            //  Alldata.push(todadate)
-         }
-         //console.log(Alldata);
-        //  this.countRoomdata = Alldata
-    }
+    /**
+     *
+     *  添加预约信息
+     * @param {*} params
+     * @param {*} title
+     * @param {*} roomId
+     * @returns
+     * @memberof Room
+     */
+    async addAppoInfo(params, title, roomId) {
+        try {
+            let errorArr = [];
+            const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+            const conflictdata = {
+                roomId: roomId,
+                time: params,
+                uid: userInfo.uid
+            }
+            //判断预约是否冲突
+            let conflictres = await request(urls.judgeAppoConflict, 'POST', conflictdata);
+            if (conflictres.code === 1) {
+                return 'conflict';
+            } else if (conflictres.code === 2) {
+                return 'room';
+            } else if (conflictres.code === 3) {
+                return 'user';
+            } else if (conflictres.code === 0) {
+                 for (let i = 0; i < params.length; i++) {
+                     let data = {
+                         name: userInfo.name,
+                         uid: userInfo.uid,
+                         department: userInfo.department,
+                         appoTime: params[i].time,
+                         roomId: roomId,
+                         date: params[i].date,
+                         title: title,
+                     }
+                     let result = await request(urls.addAppoInfo, 'POST', data);
+                     if (result.code !== 0) {
+                        errorArr.push('error')
+                     }
+                 };
+                 if (errorArr.length === 0) {
+                    return 'ok';
+                 } else {
+                    return 'error';
+                 }
+            } else {
+                return 'error';
+            } 
+        } catch (error) {
+            throw error;
+        } finally {
 
+        }
+    }
+    /**
+     *
+     * 删除预约
+     * @param {*} appoIdarr
+     * @returns
+     * @memberof Room
+     */
+    async deleteAppo(appoIdarr) {
+        try {
+            this.isShowLoading = true;
+            let body = {
+                "appoId": appoIdarr,
+                "status": "1"
+            }
+            let result = await request(urls.deleteAppo + `?body=${JSON.stringify(body)}`);
+            if (result.ok === 1) {
+                appoIdarr.forEach(ele => {
+                    if (this.myorderInfo.findIndex(item => item.appoId === ele) !== -1) {
+                        this.myorderInfo.splice(this.myorderInfo.findIndex(item => item.appoId === ele), 1)
+                    }
+                });
+                return 'ok'
+            } else {
+                return 'error'
+            }
+        } catch (error) {
+            throw error;
+        } finally {
+            this.isShowLoading = false;
+        }
+    }
 }
 
 export default Appo

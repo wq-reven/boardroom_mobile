@@ -59,7 +59,19 @@
     display: none
 }
 
-
+.roomproperty{
+    position: absolute;
+    bottom: 7px;
+    left: 5px;
+}
+.roomproperty span{
+    display: inline-block;
+    padding: 2px;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    background: rgba(16, 142, 233, .9)
+}
 .my-drawer {
     position: relative;
     overflow: auto;

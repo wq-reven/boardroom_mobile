@@ -1,5 +1,9 @@
-import {observable, computed,action} from "mobx";
-import {APIHOST} from '../utils/util';
+import {
+    observable,
+    computed,
+    action
+} from "mobx";
+import { APIHOST,} from '../utils/util';
 import request from '../utils/request';
 import getRecommend from "../utils/recommend";
 import moment from 'moment';
@@ -7,8 +11,10 @@ import moment from 'moment';
 const urls = {
     getRoomInfo: APIHOST + 'room/queryRoomInfo',
     getAPPOInfo: APIHOST + 'appo/queryAppoInfo',
+    queryAppoInfoDetail: APIHOST + 'appo/queryAppoInfoDetail',
     addAppoInfo: APIHOST + 'appo/addAppo',
-    deleteAppo: APIHOST + 'appo/deleteAppo'
+    deleteAppo: APIHOST + 'appo/deleteAppo',
+    judgeAppoConflict: APIHOST + 'appo/judgeAppoConflict',
 };
 
 class Room {
@@ -19,87 +25,88 @@ class Room {
     @observable drawerStatus = false;
     @observable viewVisible = false;
     @observable isShowLoading = false;
+    @observable isselect = true;
     @observable searchValue = {}
     @observable sortValue = {}
     @observable myorderInfo = []
     @observable countRoomdata = []
     @observable countTime = [{
-           key: '1',
-           time: "9:00"
-       },
-       {
-           key: '2',
-           time: "9:30"
-       },
-       {
-           key: '3',
-           time: "10:00"
-       },
-       {
-           key: '4',
-           time: "10:30"
-       },
-       {
-           key: '5',
-           time: "11:00"
-       },
-       {
-           key: '6',
-           time: "11:30"
-       },
-       {
-           key: '7',
-           time: "12:00"
-       },
-       {
-           key: '8',
-           time: "12:30"
-       },
-       {
-           key: '9',
-           time: "13:00"
-       },
-       {
-           key: '10',
-           time: "13:30"
-       },
-       {
-           key: '11',
-           time: "14:00"
-       },
-       {
-           key: '12',
-           time: "14:30"
-       },
-       {
-           key: '13',
-           time: "15:00"
-       },
-       {
-           key: '14',
-           time: "15:30"
-       },
-       {
-           key: '15',
-           time: "16:00"
-       },
-       {
-           key: '16',
-           time: "16:30"
-       },
-       {
-           key: '17',
-           time: "17:00"
-       },
-       {
-           key: '18',
-           time: "17:30"
-       },
-       {
-           key: '19',
-           time: "18:00"
-       },
-   ];
+            key: '1',
+            time: "9:00"
+        },
+        {
+            key: '2',
+            time: "9:30"
+        },
+        {
+            key: '3',
+            time: "10:00"
+        },
+        {
+            key: '4',
+            time: "10:30"
+        },
+        {
+            key: '5',
+            time: "11:00"
+        },
+        {
+            key: '6',
+            time: "11:30"
+        },
+        {
+            key: '7',
+            time: "12:00"
+        },
+        {
+            key: '8',
+            time: "12:30"
+        },
+        {
+            key: '9',
+            time: "13:00"
+        },
+        {
+            key: '10',
+            time: "13:30"
+        },
+        {
+            key: '11',
+            time: "14:00"
+        },
+        {
+            key: '12',
+            time: "14:30"
+        },
+        {
+            key: '13',
+            time: "15:00"
+        },
+        {
+            key: '14',
+            time: "15:30"
+        },
+        {
+            key: '15',
+            time: "16:00"
+        },
+        {
+            key: '16',
+            time: "16:30"
+        },
+        {
+            key: '17',
+            time: "17:00"
+        },
+        {
+            key: '18',
+            time: "17:30"
+        },
+        {
+            key: '19',
+            time: "18:00"
+        },
+    ];
     @observable date = []
 
     // 计算属性
@@ -114,11 +121,14 @@ class Room {
     changeVisible(status) {
         this.viewVisible = status;
     }
-    changeIsShowLoading(status){
+    changeIsShowLoading(status) {
         this.isShowLoading = status;
     }
-    changeDrawerStatus(status){
+    changeDrawerStatus(status) {
         this.drawerStatus = status
+    }
+    changeSelectStatus(status) {
+        this.isselect = status
     }
     /**
      *
@@ -126,7 +136,7 @@ class Room {
      * @param {*} type
      * @memberof Room
      */
-    changeMainType(type){
+    changeMainType(type) {
         this.mainType = type;
     }
     /**
@@ -144,20 +154,37 @@ class Room {
             for (let j = 0, clen = this.countTime.length - 1; j < clen; j++) {
                 timedata = {};
                 let countTime = this.countTime;
+                let c_time = this.countTime[j].time
+                let c_timearr = c_time.split(':');
+                let d = Date.parse(new Date(this.appoInfo[i].date));
+                let count_time = d + (Number(c_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(c_timearr[1])) * 60 * 1000;
                 if (this.appoInfo[i].time.includes(countTime[j].time)) {
                     timedata = {
-                        key: i+this.countTime[j].key,
+                        key: i + this.countTime[j].key,
                         time: this.countTime[j].time,
                         value: this.appoInfo[i].date,
-                        status: "1"
+                        status: "1",
+                        uid: this.appoInfo[i].uidobj[this.countTime[j].time] || ''
                     }
                 } else {
-                    timedata = {
-                        key: i+this.countTime[j].key,
-                        k_id: this.countTime[j].key,
-                        time: this.countTime[j].time,
-                        value: this.appoInfo[i].date,
-                        status: "0"
+                    if (Date.parse(new Date()) < count_time) {
+                        timedata = {
+                            key: i + this.countTime[j].key,
+                            k_id: this.countTime[j].key,
+                            time: this.countTime[j].time,
+                            value: this.appoInfo[i].date,
+                            status: "0",
+                            uid: ''
+                        }
+                    } else {
+                        timedata = {
+                            key: i + this.countTime[j].key,
+                            k_id: this.countTime[j].key,
+                            time: this.countTime[j].time,
+                            value: this.appoInfo[i].date,
+                            status: "2",
+                            uid: ''
+                        }
                     }
                 }
                 datedata.push(timedata)
@@ -175,17 +202,26 @@ class Room {
      * 生成日期数据
      * @memberof Room
      */
-    getday(){
+    getday() {
+        const _week = {
+            Sunday: '日',
+            Monday: '一',
+            Tuesday: '二',
+            Wednesday: '三',
+            Thursday: '四',
+            Friday: '五',
+            Saturday: '六'
+        }
         let date = new Date().setHours(6, 0, 0, 0);
         let weekdate = [];
         for (let i = 0; i < 7; i++) {
             let day_data = {
                 value: moment(date).format('DD'),
-                day: (moment(date).format('dddd')).substr(0,3),
-                id:i
+                day: _week[(moment(date).format('dddd'))],
+                id: i
             }
             weekdate.push(day_data);
-            date = date + 60 * 60 * 1000 * 24;    
+            date = date + 60 * 60 * 1000 * 24;
         }
         this.date = weekdate;
     }
@@ -219,11 +255,11 @@ class Room {
         try {
             this.isShowLoading = true;
             let result = await request(urls.getRoomInfo + this.formatGetParams());
-            //this.roomdata = result.docs;
             if (this.mainType === 'all') {
                 this.roomdata = result.docs;
-            } else{
-                this.roomdata = await getRecommend(result.docs);
+            } else {
+                let data = await getRecommend(result.docs);
+                this.roomdata = data
             }
         } catch (error) {
             throw error;
@@ -261,7 +297,7 @@ class Room {
      * @param {*} time
      * @memberof Room
      */
-    async getAppoInfoByTime(roomId,date,time) {
+    async getAppoInfoByTime(roomId, date, time) {
         try {
             let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":["${date}","${date}"],"appoTime":"${time}"},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
             this.userOrderInfo = result.docs[0];
@@ -276,40 +312,50 @@ class Room {
      * 获取预约信息（详情页）
      * @param {*} roomId
      * @memberof Room
-     */
+     */queryAppoInfoDetail
     async getAppoInfo(roomId) {
         try {
             this.isShowLoading = true;
-            let date = new Date().setHours(6, 0, 0, 0);
-            let arr = [];
-            let appotime = ""
-            for (let i = 0; i < 7; i++) {
-                appotime = moment(date).format().substr(0, 10)
-                let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":["${appotime}","${appotime}"]},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
-                let day = {};
-                let daytime = [];
-                if (result.docs != "") {
-                    result.docs.map(item => {
-                        daytime = [...daytime, ...item.appoTime]
-                    });
-                    day = {
-                        date: result.docs[0].date,
-                        time: daytime
-                    };
-                } else {
-                    day = {
-                        date: moment(date).format().substr(0, 10),
-                        time: []
-                    };
-                }
-                arr.push(day);
-                date = date + 60 * 60 * 1000 * 24;
-            }
-            this.appoInfo = arr;
+            let result = await request(urls.queryAppoInfoDetail + '?body=' + encodeURIComponent(JSON.stringify({
+                roomId: roomId
+            })));
+            // let date = new Date().setHours(6, 0, 0, 0);
+            // let arr = [];
+            // let appotime = ""
+            // for (let i = 0; i < 7; i++) {
+            //     appotime = moment(date).format().substr(0, 10)
+            //     let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":["${appotime}","${appotime}"]},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
+            //     let day = {};
+            //     let daytime = [];
+            //     let uidobj = {};
+            //     if (result.docs.length > 0) {
+            //         result.docs.forEach(item => {
+            //             daytime = [...daytime, ...item.appoTime]
+            //             item.appoTime.forEach(ele => {
+            //                 uidobj[ele] = item.uid
+            //             })
+            //         });
+            //         day = {
+            //             date: result.docs[0].date,
+            //             time: daytime,
+            //             uidobj: uidobj
+            //         };
+            //     } else {
+            //         day = {
+            //             date: moment(date).format().substr(0, 10),
+            //             time: [],
+            //             uidobj: {}
+            //         };
+            //     }
+            //     arr.push(day);
+            //     date = date + 60 * 60 * 1000 * 24;
+            // }
+            // console.log(arr);
+            this.appoInfo = result;
             this.setdata();
         } catch (error) {
             throw error;
-        } finally{
+        } finally {
             this.isShowLoading = false;
         }
     }
@@ -326,26 +372,43 @@ class Room {
         try {
             let errorArr = [];
             const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-            for (let i = 0; i < params.length; i++) {
-               let data = {
-                    name: userInfo.name,
-                    uid: userInfo.uid,
-                    department: userInfo.department,
-                    appoTime: params[i].time,
-                    roomId: roomId,
-                    date:params[i].date,
-                    title: title
-                }
-                let result = await request(urls.addAppoInfo, 'POST', data);
-                if (result.code !== 0) {
-                    errorArr.push('error')
-                }
-            };
-            if (errorArr.length === 0) {
-                return 'ok';
+            const conflictdata = {
+                roomId: roomId,
+                time: params,
+                uid: userInfo.uid
+            }
+            //判断预约是否冲突
+            let conflictres = await request(urls.judgeAppoConflict, 'POST', conflictdata);
+            if (conflictres.code === 1) {
+                return 'conflict';
+            } else if (conflictres.code === 2) {
+                return 'room';
+            } else if (conflictres.code === 3) {
+                return 'user';
+            } else if (conflictres.code === 0) {
+                 for (let i = 0; i < params.length; i++) {
+                     let data = {
+                         name: userInfo.name,
+                         uid: userInfo.uid,
+                         department: userInfo.department,
+                         appoTime: params[i].time,
+                         roomId: roomId,
+                         date: params[i].date,
+                         title: title,
+                     }
+                     let result = await request(urls.addAppoInfo, 'POST', data);
+                     if (result.code !== 0) {
+                        errorArr.push('error')
+                     }
+                 };
+                 if (errorArr.length === 0) {
+                    return 'ok';
+                 } else {
+                    return 'error';
+                 }
             } else {
                 return 'error';
-            }
+            } 
         } catch (error) {
             throw error;
         } finally {
@@ -368,12 +431,12 @@ class Room {
             }
             let result = await request(urls.deleteAppo + `?body=${JSON.stringify(body)}`);
             if (result.ok === 1) {
-               appoIdarr.forEach(ele => {
-                   if (this.myorderInfo.findIndex(item => item.appoId === ele) !== -1) {
-                       this.myorderInfo.splice(this.myorderInfo.findIndex(item => item.appoId === ele), 1)
-                   }
-               });
-               return 'ok'
+                appoIdarr.forEach(ele => {
+                    if (this.myorderInfo.findIndex(item => item.appoId === ele) !== -1) {
+                        this.myorderInfo.splice(this.myorderInfo.findIndex(item => item.appoId === ele), 1)
+                    }
+                });
+                return 'ok'
             } else {
                 return 'error'
             }

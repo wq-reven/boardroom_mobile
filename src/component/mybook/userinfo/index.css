@@ -10,3 +10,42 @@
     font-size: 1.3rem;
     color: #fff;
 }
+.personinfo_ava{
+    width: 5rem;
+    height: 5rem;
+    background: #6eafff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 3rem;
+    text-align: center;
+    line-height: 5rem;
+    font-weight:bold;
+    margin: auto;
+}
+.personinfo_detail{
+    text-align: center;
+    padding: .5rem 0 2rem;
+}
+
+.personinfo_detail p{
+    padding: .3rem 0;
+}
+.personinfo_detail span{
+    padding-left: .1rem ;
+}
+.personinfo_detail_key{
+    display: block;
+    text-align: right;
+    color: #999
+}
+.personinfo_list{
+    height: 100%;
+}
+.personal_tip{
+    font-size: .8rem;
+    text-align: center;
+    width:100%;
+    color: #999;
+    bottom: 4rem;
+    position: fixed;
+}

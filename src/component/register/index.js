@@ -2,7 +2,7 @@ import React,{ Component } from "react";
 import { createForm } from 'rc-form';
 import { List,NavBar, Icon,WhiteSpace ,Toast,InputItem,Button,Picker, WingBlank,Modal} from 'antd-mobile';
 import  "./index.css";
-import { formatFormData } from "../../utils/util";
+import { formatFormData,dealCookie,returnDepartment } from "../../utils/util";
 import {withRouter} from 'react-router-dom';
 import { observer,inject } from 'mobx-react';
 import md5 from "md5";
@@ -24,11 +24,14 @@ class Register extends Component {
                         password: value.password,
                         // password: md5(value.password),
                         department: value.department[0],
-                        name: value.name
+                        name: value.name,
+                        email:value.email
                     }
                     let res = await this.props.user.userRegister(user_data);
                     if (res === 'success') {
                         this.registerSuccess();
+                        dealCookie.set('phone', user_data.phone, 15);
+                        dealCookie.set('password', user_data.password, 15);
                         this.props.history.push('./login');
                     } else if (res === 'userexist') {
                         this.registerFail('手机号已存在，请重试');
@@ -58,11 +61,29 @@ class Register extends Component {
                 callback();
             }
         }
+        checkName = (rule, value, callback) => {
+            let rex = /^[\u4e00-\u9fa5]+$/; //姓名正则
+            if (!rex.test(value)) {
+                 callback('error');
+            }
+        }
         checkPhone = (rule, value, callback) => {
             if (value.replace(/\s/g, '').length < 11) {
                 callback('error');
             } else {
                 callback();
+            }
+        }
+        checkEmail = (rule, value, callback) => {
+            const rex = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
+            if (value) {
+                if (rex.test(value)) {
+                    callback();
+                } else {
+                    callback('error');
+                }
+            } else {
+                    callback('error');
             }
         }
         checkpass = (rule,value,callback) => {
@@ -75,16 +96,7 @@ class Register extends Component {
         render(){
             const {history} = this.props;
             const { getFieldProps, getFieldError } = this.props.form;
-            const area  = [
-                {
-                    label: "课程部",
-                    value: '课程部',
-                },
-                {
-                    label: "产品研发部",
-                    value: '产品研发部',
-                }
-            ];
+            const area = returnDepartment;
             return(
                 <div>
                 <NavBar
@@ -103,7 +115,7 @@ class Register extends Component {
                                         },
                                         this.checkPhone
                                     ],
-                                    validateTrigger: 'onBlur',
+                                    validateTrigger: 'onChange',
                                 })
                             }
                             type="phone"
@@ -115,7 +127,8 @@ class Register extends Component {
                                 {
                                     rules: [{
                                             required: true,
-                                        }
+                                        },
+                                        this.checkName
                                     ],
                                 })
                             }
@@ -123,6 +136,21 @@ class Register extends Component {
                             placeholder="输入姓名"
                             error={getFieldError('name')?true:false}
                         >姓名</InputItem>
+                        <InputItem
+                            {...getFieldProps('email',
+                                {
+                                    rules: [{
+                                            required: true,
+                                        },
+                                        this.checkEmail
+                                    ],
+                                     validateTrigger: 'onChange',
+                                })
+                            }
+                            type="email"
+                            placeholder="输入公司邮箱"
+                            error={getFieldError('email')?true:false}
+                        >邮箱</InputItem>
                         <Picker
                             data={area} 
                             error = {

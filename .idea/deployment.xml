@@ -2,6 +2,13 @@
 <project version="4">
   <component name="PublishConfigData" serverName="te">
     <serverData>
+      <paths name="243">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="te">
         <serverdata>
           <mappings>

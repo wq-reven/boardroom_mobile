@@ -28,11 +28,36 @@
     height: 5.5rem;
     float: right;
 }
-
+.fn_left{
+    float: left;
+    display: block
+}
+.fn_right{
+    float:right;
+    display: block
+}
+.fn_clear::after{
+    display: block;
+    content: "";
+    height: 0;
+    clear: both;
+}
 .right_content {
     display: block;
     margin: 1.7rem 1rem 0;
     width: 1.5rem;
     height: 1.5rem;
     background: url('./image/arrow-r.svg') no-repeat center 90%;
+}
+.rea_right_content{
+     width: 1.5rem;
+     height: 1.5rem;
+     line-height: 1.5rem;
+     background: url('./image/right.svg') no-repeat center 100%;
+}
+.Login_person{
+    padding: 15px 20px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff
 }

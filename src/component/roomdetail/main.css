@@ -47,7 +47,7 @@
 
 .headerleft {
   height: 40px;
-  line-height: 40px;
+  line-height: 20px;
   font-size: 12px;
 }
 
@@ -189,3 +189,11 @@
 .am-checkbox.am-checkbox-disabled.am-checkbox-checked .am-checkbox-inner {
     background: #000
 } */
+.room_title{
+  background-color: #fff;
+  padding: 0 0 5px;
+  text-align: center;
+  font-size: 12px;
+  position: relative;
+  bottom: 8px
+}

@@ -8,7 +8,6 @@ import { observer,inject } from 'mobx-react';
 @observer
 
 export default class Readylogin extends Component {
-   
     render(){ 
         let storestr = sessionStorage.getItem('userInfo')
         if (storestr !== null) {
@@ -16,19 +15,27 @@ export default class Readylogin extends Component {
             return(
                  <div className="Login">
                         <div className="Login_title">
-                            <Link to="/mybook/userinfo">
-                                 <Flex>
-                                    <Flex.Item>
-                                            <div className="Login_btn">
-                                              <img src={avatar1} />
-                                            </div>
-                                            <div className="login_content">
-                                             {store.name}
-                                            </div>
+                            <Flex>
+                                <Flex.Item>
+                                        <div className="Login_btn">
+                                            <img src={avatar1} />
+                                        </div>
+                                        <div className="login_content">
+                                            {store.name}
+                                        </div>
                                     </Flex.Item>
                                 </Flex>
-                            </Link>
                         </div>
+                     <Link to="/mybook/userinfo">
+                        <div className="Login_person fn_clear">
+                           <span className="fn_left">我的信息</span>
+                             <i className="rea_right_content fn_right">
+                            </i>
+                        </div>
+                    </Link>
+                    <div>
+
+                    </div>
                  </div>  
             )
         } else{

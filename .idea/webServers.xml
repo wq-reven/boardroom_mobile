@@ -10,6 +10,14 @@
           <option name="port" value="22" />
         </fileTransfer>
       </webServer>
+      <webServer id="11f011da-1ed6-420f-b814-f300515d07af" name="243" url="http://172.16.0.243">
+        <fileTransfer host="172.16.0.243" port="22" rootFolder="/usr/ET/project/meetroom/roomclient" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

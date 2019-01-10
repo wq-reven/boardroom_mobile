@@ -1,18 +1,22 @@
-import React,{ Component } from "react";
+import React, { Component } from "react";
 import './main.css';
-import { observer,inject } from 'mobx-react';
-import { Flex, Checkbox, WhiteSpace, WingBlank, Modal, Toast, NavBar, Icon, Popover} from "antd-mobile";
+import { observer, inject } from 'mobx-react';
+import { Flex, Checkbox, WhiteSpace, WingBlank, Modal, Toast, NavBar, Icon, Popover } from "antd-mobile";
 import { withRouter } from "react-router-dom";
 import fresh from "./image/fresh.svg";
 import Spin from "../layout/spin";
+import ClickBox from "../layout/clickBox";
+import { returnRoomPosition, renderCountEndTime } from "../../utils/util";
 @inject('room')
 @observer
 
-class Main extends Component{
+class Main extends Component {
     state = {
         selectArr: [],
         roomId: '',
         visible: false,
+        isselect:true,
+        countTitle:''
     }
     componentDidMount() {
         this.props.room.getday();
@@ -20,7 +24,7 @@ class Main extends Component{
         let path_arr = window.location.pathname.split(':');
         this.setState({
             roomId: path_arr[1]
-        }); 
+        });
         this.getNowAppo(path_arr[1]);
     }
     /**
@@ -28,25 +32,27 @@ class Main extends Component{
      * 刷新页面数据
      * @memberof Main
      */
-    getNowAppo = roomId =>{
+    getNowAppo = roomId => {
         //根据ID查询会议室预约信息
-        this.props.room.getAppoInfo(roomId);     
+        this.props.room.getAppoInfo(roomId);
     }
     /**
      *
      * 双向绑定已选中时刻和state数据
      * @memberof Main
      */
-    onChange = (key, time, date) => {
+    onChange = (key, time, date, k_id) => {
+
         if (this.state.selectArr.findIndex(item => item.key === key) !== -1) {
             let arr = this.state.selectArr;
-            arr.splice(arr.findIndex(item => item.key === key), 1)
+            arr.splice(arr.findIndex(item => item.key === key), 1);
             this.state.selectArr = arr;
         } else {
             let item = {
                 key: key,
                 time: time,
-                date: date
+                date: date,
+                k_id: k_id
             }
             this.state.selectArr = [...this.state.selectArr, item];
         }
@@ -88,16 +94,29 @@ class Main extends Component{
         let pa_item = {};
         for (let item in data) {
             let time_arr = [];
+            let keyarr = []
             for (let j = 0; j < data[item].length; j++) {
                 time_arr.push(data[item][j].time);
+                keyarr.push(data[item][j].k_id)
             }
             pa_item = {
                 date: item,
-                time: time_arr
+                time: time_arr,
+                key_r: keyarr
             }
             findata.push(pa_item);
         }
         return findata;
+    }
+    judgeorderTime(){
+        let param = this.getType(this.state.selectArr);
+        for(let item in param){
+            let ele = param[item];
+            let distance = Math.abs(Number(ele.key_r[ele.key_r.length - 1]) - Number(ele.key_r[0])) + 1;
+            if (ele.key_r.length < distance) {
+                return false
+            } 
+        }
     }
     /**
      *
@@ -105,44 +124,65 @@ class Main extends Component{
      * @memberof Main
      */
     judgeInfo = () => {
-        if (sessionStorage.getItem('userInfo')) {
-            this.state.selectArr.length === 0 ? Toast.info('请选择预约时间!!!', 2, null, false) : this.renderPrompt();
-        } else{
-            Toast.info('请先登录', 2, null, false);
-        }
+        !sessionStorage.getItem('userInfo')
+            ? Toast.info('请先登录', 2, null, false)
+            : this.state.selectArr.length === 0
+                ? Toast.info('请选择预约时间!!!', 2, null, false)
+                : this.judgeorderTime() === false
+                    ? Toast.fail('当日预约时间必须连续！', 1)
+                    : this.state.countTitle
+                        ? this.confirmInfo()
+                        : this.renderPrompt()
     }
     /**
      *
      * 确认是否提交
      * @memberof Main
      */
-    confirmInfo = title => {
+    confirmInfo = ctitle => {
+        const title = this.state.countTitle ? this.state.countTitle : ctitle;
+        let param = this.getType(this.state.selectArr);
+        const timestr = param.map(item=>{
+            return (<p key = {item.date}>
+                    {item.date} {item.time[0]}-{renderCountEndTime(item.time[item.time.length-1])}
+                </p>)
+            })
         const alert = Modal.alert;
-        alert('确定提交吗？', '', [{
+        const str = (<div>
+                <p>会议主题: <span>{title}</span></p>
+                <p>会议时间</p>
+                {timestr}
+            </div>)
+        alert('确定提交吗?', str, [{
             text: '取消',
-            onPress: () => { }
+            onPress: () => {}
         },
         {
             text: '确定',
             onPress: () => {
-                this.submitInfo(title)
+                this.submitInfo(title, param)
             }
         },
         ])
     }
-    
+
     /**
      *
      * 最终弹窗提交信息
      * @memberof Main
      */
-    submitInfo = async title => {
-        let param = this.getType(this.state.selectArr);
+    submitInfo = async (title, param) => {
         //判断登录状态决定是否异步提交预约信息
         let res = await this.props.room.addAppoInfo(param, title, this.state.roomId);
         if (res === 'ok') {
             Toast.success('预约成功 !!!', 1);
             this.props.history.push(`/orderroom`)
+        } else if (res === 'conflict') {
+            Toast.info('您预约的时段有冲突，请刷新后重新选择！', 4, null, false);
+        } else if (res === 'room') {
+            Toast.info('您在该时段已预约了其他会议室，请刷新后重新选择！', 4, null, false);
+        } else if (res === 'user') {
+            Toast.info('您预约的时段和他人有冲突，请刷新后重新选择！', 4, null, false);
         } else {
             Toast.info('预约失败，请重试!!!', 2, null, false);
         }
@@ -155,19 +195,22 @@ class Main extends Component{
     renderPrompt() {
         const prompt = Modal.prompt;
         prompt('请输入会议主题', '', [{
-                text: '取消'
-            },
-            {
-                text: '确定',
-                onPress: value => {
-                    if (value === '') {
-                        Toast.info('请填写会议主题!!!', 2, null, false);
-                        this.renderPrompt();
-                    } else {
-                        this.confirmInfo(value);
-                    }
+            text: '取消'
+        },
+        {
+            text: '确定',
+            onPress: value => {
+                if (value === '') {
+                    Toast.info('请填写会议主题!!!', 2, null, false);
+                    this.renderPrompt();
+                } else {
+                    this.setState({
+                        countTitle: value
+                    });
+                    this.confirmInfo(value);
                 }
-            },
+            }
+        },
         ])
     }
     onSelect = opt => {
@@ -181,141 +224,205 @@ class Main extends Component{
             visible,
         });
     };
-    render(){
-            const store = this.props.room;
-            const CheckboxItem = Checkbox.CheckboxItem;
-            const timeBar = store.countTime.map(item => {
-                return(
-                    <li key={item.key} className="timebar">
-                        {item.time}
-                    </li>
-                )
-            });
-            const dateBar = store.date.map(item=>{
-                return(
-                     <Flex.Item  style={{textAlign:'center',fontSize:12}} key={item.id}>
-                        <span>
-                            {item.value}
-                        </span>
-                        <br />
-                        <span>
-                            {item.day}
-                        </span>
-                    </Flex.Item>
-                )
-            })
-            const list = store.countRoomdata.map(item =>{
-                const selectli = item.time.map(val =>{
-                       if (val.status === "0") {
-                            return(
-                                <li  
-                                    key={val.time}
-                                    className="selectBox"
-                                >
-                                <CheckboxItem key={val.key} onChange={() => this.onChange(val.key,val.time,val.value)}>
-                                </CheckboxItem>
-                                </li>    
-                            )
-                       } else {
-                            return(
-                                <li  
-                                    key={val.time}
-                                    className = "selectBox"
-                                >
-                                    <div className="selectBox_disabed"
-                                        onClick={()=>{
-                                            this.getInfo(val.time,val.value)
-                                            }}
-                                            >
-                                         <CheckboxItem  
-                                            key="disabled" data-seed="logId" disabled defaultChecked>
-                                        </CheckboxItem>
-                                    </div>
-                                </li>   
-                            )
-                       }
-                });
-                return(
-                    <Flex.Item key={item.value}>
-                        {selectli}
-                    </Flex.Item>
-                )
-            });
-            const Item = Popover.Item;
-            const myImg = () => <img src={fresh} className="am-icon am-icon-xs" alt="" />;
+    goMain = () =>{
+        this.props.history.push(`/index`);
+    }
+    tipmessage(){
+        Toast.info('该时段已过期！', 1, null, false); 
+    }
+    returnSumBtn =()=>{
+        if (sessionStorage.getItem('userInfo')){
             return(
-                <div className="mainroom">
-                    <NavBar
-                        mode="light"
-                        icon={<Icon type="left" />}
-                        onLeftClick={this.props.history.goBack}
-                        rightContent={
-                            <Popover mask
-                                overlayClassName="fortest"
-                                overlayStyle={{ color: 'currentColor' }}
-                                visible={this.state.visible}
-                                overlay={[
-                                    (<Item key="4" value="scan" icon={myImg()} data-seed="logId">刷新</Item>),
-                                ]}
-                                align={{
-                                    overflow: { adjustY: 0, adjustX: 0 },
-                                    offset: [-10, 0],
-                                }}
-                                onVisibleChange={this.handleVisibleChange}
-                                onSelect={this.onSelect}
-                            >
-                                <div style={{
-                                    height: '100%',
-                                    padding: '0 15px',
-                                    marginRight: '-15px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }}
-                                >
-                                    <Icon type="ellipsis" />
-                                </div>
-                            </Popover>
-                        }
-                        >
-                        会议室预订
-                    </NavBar>
-                    <Spin isLoading={store.isShowLoading}>
-                        <div>
-                            <WhiteSpace />
-                            <WingBlank size="sm">
-                                <div className="listHeader clearfix">
-                                    <div className="leftBar headerleft">
-                                        {(new Date()).getMonth() + 1}月
-                                    </div>
-                                    <div className="dateBar">
-                                        <Flex>
-                                            {dateBar}
-                                        </Flex>
-                                    </div>
-                                </div>
-                                <div className="detail_con clearfix">
-                                    <div className="leftBar">
-                                        {timeBar}
-                                    </div>
-                                    <div className="listBox">
-                                        <Flex >
-                                            {list}
-                                        </Flex>
-                                    </div>
-                                    <WhiteSpace />
-                                </div>
-                            </WingBlank>
-                        </div>
-                   </Spin>
-                    <div
-                        onClick = {() =>
-                            this.judgeInfo()
-                        }
-                        className="uesr_submit">
-                        提交
-                    </div>
+                <div
+                    onClick={() =>
+                        this.judgeInfo()
+                    }
+                    className="uesr_submit">
+                    提交
                 </div>
             )
+        } else{
+            return(
+                <div
+                    onClick={() =>
+                        this.props.history.push(`/login?from=/roomdetail/:${this.state.roomId}`)
+                    }
+                    className="uesr_submit">
+                    登录
+                </div>
+            )
+        }
+    }
+    render() {
+        const store = this.props.room;
+        const timeBar = store.countTime.map(item => {
+            return (
+                <li key={item.key} className="timebar">
+                    {item.time}
+                </li>
+            )
+        });
+        const dateBar = store.date.map(item => {
+            return (
+                <Flex.Item style={{ textAlign: 'center', fontSize: 12 }} key={item.id}>
+                    <span>
+                        {item.value}
+                    </span>
+                    <br />
+                    <span>
+                        {item.day}
+                    </span>
+                </Flex.Item>
+            )
+        })
+        const list = store.countRoomdata.map(item => {
+            const selectli = item.time.map(val => {
+                if (val.status === "0") {
+                    return (
+                        <li 
+                            className="s_selectBox"
+                            key={val.time}
+                            onClick={() => {
+                                this.onChange(val.key, val.time, val.value,val.k_id)
+                        }}>
+                            <ClickBox selectstatus={this.state.isselect}>
+                            </ClickBox>
+                        </li>
+                        
+                    )
+                } else if (val.status === "1") {
+                    let uid = '';
+                    let userInfostr = sessionStorage.getItem('userInfo') ? sessionStorage.getItem('userInfo') : ''
+                    if (userInfostr) {
+                        let userInfo = JSON.parse(userInfostr);
+                        uid = userInfo.uid
+                    }
+                    if (val.uid === uid) {
+                        return (
+                            <li
+                                key={val.time}
+                                onClick={() => {
+                                    this.getInfo(val.time, val.value)
+                                }}
+                                className="s_selectBox"
+                            >
+                                <ClickBox
+                                    disabled={true}
+                                    isme = {true}
+                                >
+                                </ClickBox>
+                            </li>
+                        )
+                    } else{
+                        return (
+                            <li
+                                key={val.time}
+                                onClick={() => {
+                                    this.getInfo(val.time, val.value)
+                                }}
+                                className="s_selectBox"
+                            >
+                                <ClickBox
+                                    disabled={true}
+                                >
+                                </ClickBox>
+                            </li>
+                        )
+                    }
+                   
+                } else if (val.status === "2") {
+                    return (
+                        <li
+                            key={val.time}
+                            onClick={() => {
+                                this.tipmessage()
+                            }}
+                            className="s_selectBox"
+                        >
+                            <ClickBox
+                                disabled={true}
+                                overtime={true}
+                            >
+                            </ClickBox>
+                        </li>
+                    )
+                } 
+            });
+            return (
+                <div key={item.value} className="n_select_out">
+                    {selectli}
+                </div>
+            )
+        });
+        const Item = Popover.Item;
+        const myImg = () => <img src={fresh} className="am-icon am-icon-xs" alt="" />;
+        return (
+            <div className="mainroom">
+                <NavBar
+                    mode="light"
+                    icon={<Icon type="left" />}
+                    onLeftClick={()=>this.goMain()}
+                    rightContent={
+                        <Popover mask
+                            overlayClassName="fortest"
+                            overlayStyle={{ color: 'currentColor' }}
+                            visible={this.state.visible}
+                            overlay={[
+                                (<Item key="4" value="scan" icon={myImg()} data-seed="logId">刷新</Item>),
+                            ]}
+                            align={{
+                                overflow: { adjustY: 0, adjustX: 0 },
+                                offset: [-10, 0],
+                            }}
+                            onVisibleChange={this.handleVisibleChange}
+                            onSelect={this.onSelect}
+                        >
+                            <div style={{
+                                height: '100%',
+                                padding: '0 15px',
+                                marginRight: '-15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
+                            >
+                                <Icon type="ellipsis" />
+                            </div>
+                        </Popover>
+                    }
+                >
+                    会议室预订
+                    </NavBar>
+                <div className="room_title">
+                    ({returnRoomPosition(this.state.roomId)})
+                </div>
+                <Spin isLoading={store.isShowLoading}>
+                    <div>
+                        <WingBlank size="sm">
+                            <div className="listHeader clearfix">
+                                <div className="leftBar headerleft">
+                                    {(new Date()).getMonth() + 1}月
+                            </div>
+                                <div className="dateBar">
+                                    <Flex>
+                                        {dateBar}
+                                    </Flex>
+                                </div>
+                            </div>
+                            <div className="detail_con clearfix">
+                                <div className="leftBar">
+                                    {timeBar}
+                                </div>
+                                <div className="n_listBox">
+                                        {list}
+                                </div>
+                                <WhiteSpace />
+                            </div>
+                        </WingBlank>
+                    </div>
+                </Spin>
+                {this.returnSumBtn()}
+            </div>
+        )
     }
 }
 

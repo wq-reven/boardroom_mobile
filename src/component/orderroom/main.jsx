@@ -5,7 +5,10 @@ import { withRouter } from "react-router-dom";
 import moment from "moment";
 import { formatViewData, returnRoomPosition } from "../../utils/util";
 import Spin from "../layout/spin";
-import "./main.css"
+import "./main.css";
+import imgstart from "./image/start.png";
+import imgfinish from "./image/finish.png";
+import imgpro from "./image/process.png";
 @inject('room')
 @observer
 
@@ -20,12 +23,13 @@ class Main extends Component{
     onChange = value =>{
         this.props.room.getAppoInfoByParam(value);
     }
-    viewOverdata(date, time) {
+    viewOverdata(date, time, endtime,enddate) {
         let s_timearr = time[0].split(':');
-        let e_timearr = this.renderCountEndTime(time[time.length - 1]).split(':');
+        let e_timearr = this.renderCountEndTime(endtime[endtime.length - 1]).split(':');
         let d = Date.parse(new Date(date));
+        let endd = Date.parse(new Date(enddate));
         let s_t = d + (Number(s_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(s_timearr[1])) * 60 * 1000;
-        let e_t = d + (Number(e_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(e_timearr[1])) * 60 * 1000;
+        let e_t = endd + (Number(e_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(e_timearr[1])) * 60 * 1000;
         if (Date.parse(new Date()) < s_t) {
             return (
                 <span style={{color:'blue'}}>
@@ -35,13 +39,17 @@ class Main extends Component{
         } else if (Date.parse(new Date()) > s_t && Date.parse(new Date()) < e_t) {
             return (
                 <span style={{ color: 'green' }}>
-                    正在进行
+                    会议历程中
                 </span>
             )
         } else {
             return '已过期';
         }
-    } 
+    }
+    /**
+     * 渲染会议时间
+     * @param {*} time 
+     */ 
     renderCountEndTime(time){
         let timearr = time.split(':');
         let endtime = timearr[1] === '00'
@@ -50,6 +58,31 @@ class Main extends Component{
                 ? (Number(timearr[0]) + 1) + ':00'
                 : '';
         return endtime;
+    }
+    /**
+     *
+     * 计算当日会议进行状态
+     * @memberof Main
+     */
+    dayTimeOver = (date,starttime,endtime)=>{
+        let s_timearr = starttime.split(':');
+        let e_timearr = this.renderCountEndTime(endtime).split(':');
+        let d = Date.parse(new Date(date));
+        let s_t = d + (Number(s_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(s_timearr[1])) * 60 * 1000;
+        let e_t = d + (Number(e_timearr[0]) - 8) * 60 * 60 * 1000 + (Number(e_timearr[1])) * 60 * 1000;
+        if (Date.parse(new Date()) < s_t){
+            return (
+                <img src={imgstart} />
+            )
+        } else if (Date.parse(new Date()) > s_t && Date.parse(new Date()) < e_t) {
+            return (
+                <img src={imgpro} />
+            )
+        } else {
+            return (
+                <img src={imgfinish} />
+            )
+        }
     }
     renderData(list) {
         let data = [];
@@ -73,18 +106,22 @@ class Main extends Component{
                 appoIdarr.push(param.appoId)
                 return(
                     <p key={param._id}>
-                        <span style={{ paddingRight: 10 }}> {param.date}</span>{param.appoTime[0]}-{this.renderCountEndTime(param.appoTime[param.appoTime.length - 1])}
+                        <span style={{ paddingRight: 10 }}> {param.date}</span>
+                        <span style={{ width: 100,display:'inline-block' }}>
+                            {param.appoTime[0]}-{this.renderCountEndTime(param.appoTime[param.appoTime.length - 1])} 
+                        </span>
+                        <span className="countstatusicon">{this.dayTimeOver(param.date, param.appoTime[0], param.appoTime[param.appoTime.length - 1])}</span>
                     </p>
                 )
             })
-                return(
-                   <div  key={item[0]._id}>
+            return(
+                   <div key={item[0]._id}>
                     <WingBlank size="lg">
                     <WhiteSpace />
                         <Card>
                             <Card.Header
                                 title={item[0].title}
-                                extra={<span style={{fontSize:12}}>{this.viewOverdata(item[item.length-1].date,item[0].appoTime)}</span>}
+                                extra={<span style={{ fontSize: 12 }}>{this.viewOverdata(item[item.length - 1].date, item[0].appoTime, item[item.length - 1].appoTime, item[0].date)}</span>}
                             />
                             <Card.Body>
                                 <div><span>会议地址：</span>{returnRoomPosition(item[0].roomId)}</div>
@@ -101,7 +138,7 @@ class Main extends Component{
                             </Card.Body>
                             <Card.Footer content="" extra={<div
                                 onClick = {() =>
-                                    alert('确定删除吗？', '', [{
+                                    alert('删除后需要重新预约，确定删除吗？', '', [{
                                             text: '取消',
                                             onPress: () => {}
                                         },
@@ -135,11 +172,12 @@ class Main extends Component{
                     position: 'sticky',
                     top: 0,
                     background: '#efeff4'
-            }}>
+                }}>
                     <WingBlank>
                         <SearchBar onChange={this.onChange} placeholder="输入会议主题搜索" />
                     </WingBlank>
                 </div>
+              
                 <div className="title">
                     <h4>--我的预约--</h4>
                 </div>

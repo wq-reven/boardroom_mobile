@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<body>
+    <div id="divbg" class="style-div">
+        <input type="text" name="" id="text" value="" />
+    </div>
+    <input type="button" value="点击" onmousedown="down()" onmouseup="up()" />
+
+
+    <script>
+       var divbg = document.getElementById("divbg");
+        var text = document.getElementById("text");
+        var i = 0;
+        var eee;
+
+        function down() {
+            divbg.style.background = "#999999";
+            exet();
+            eee = setInterval(function () {
+                exet();
+            }, 100);
+        }
+
+        function up() {
+            if (i<6) {
+                alert(1)
+            } else{
+                alert(2)
+            }
+            divbg.style.background = "#008000";
+            clearInterval(eee);
+
+        }
+
+        function exet() {
+            i++;
+            text.value = i;
+        }
+    </script>
+</body>
+</html>

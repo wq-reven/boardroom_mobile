@@ -1,18 +1,24 @@
 import React,{ Component } from "react";
 import {withRouter} from 'react-router-dom';
 import  './index.css';
-import { List, InputItem, Toast,NavBar, Icon,WhiteSpace ,Button, WingBlank} from 'antd-mobile';
+import { List, InputItem, Toast,NavBar, Icon,WhiteSpace ,Button, WingBlank,Flex,Checkbox} from 'antd-mobile';
 import { observer,inject } from 'mobx-react';
-
+import { getUrlParam,dealCookie} from "../../utils/util";
 @inject('user')
 @observer
 
 
 class Login extends Component{
+
+    componentDidMount = () =>{
+        this.getDefaultUserInfo();
+    }
     state = {
         hasError: '',
         phone: '',
-        password:''
+        password:'',
+        checkstatus: true,
+        isremember:true
     }
     NoUser() {
         Toast.fail('没有此用户！', 1);
@@ -26,7 +32,7 @@ class Login extends Component{
         }
     }
     onPhoneChange = value => {
-        if (value.replace(/\s/g, '').length < 11) {
+        if (value.length < 11) {
             this.setState({
                 hasError: true,
             });
@@ -39,29 +45,80 @@ class Login extends Component{
             phone:value
         });
     }
-     onPaChange = value => {
+    onPaChange = value => {
          this.setState({
             password:value
          });
-     }
+    }
+    rememberPassWord = e =>{
+        if (e.target.checked) {
+            this.setState({
+              isremember: true
+            });
+        } else {
+            this.setState({
+                isremember: false
+            });
+        }
+    }
+    delUserInfoByCookie = () =>{
+       dealCookie.del('phone');
+       dealCookie.del('password');
+    }
+    getDefaultUserInfo = () =>{
+        let phone = dealCookie.get('phone');
+        let password = dealCookie.get('password');
+        this.setState({
+            phone:phone,
+            password: password,
+        });
+        if (phone) {
+             this.setState({
+                hasError: false,
+            });
+        }
+    }
+    setUserInfoToCookie = () =>{
+        let phone = (this.state.phone).replace(/\s+/g, "");
+        let password = this.state.password;
+        dealCookie.set('phone', phone,15);
+        dealCookie.set('password', password,15);
+    }
     onLogin = async ()=>{
+        if (this.state.phone) {
+           this.setState({
+               hasError: false,
+           });
+        } else {
+            this.setState({
+                hasError: true,
+            });
+            Toast.fail('请输入手机号和密码！', 1)
+        }
         if (this.state.hasError === false) {
             let data = {
                 phone:(this.state.phone).replace(/\s+/g,""),
                 password:this.state.password
             }
-        let res = await this.props.user.userLogin(data)
-        if (res === 'nouser') {
-            this.NoUser()
-        } else if (res === 'error') {
-            this.passwordError()
-        } else{
-            this.props.history.push('./mybook')
-        } 
+            let res = await this.props.user.userLogin(data);
+            if (res === 'nouser') {
+                this.NoUser()
+            } else if (res === 'error') {
+                this.passwordError()
+            } else{
+                if (this.state.isremember) {
+                    this.setUserInfoToCookie();
+                } else {
+                    this.delUserInfoByCookie();
+                }
+                let from = getUrlParam('from');
+                from ? this.props.history.push(from) : this.props.history.push('./mybook')
+            } 
         } 
     }
     render(){
-       const {history} = this.props
+       const {history} = this.props;
+       const AgreeItem = Checkbox.AgreeItem;
         return(
             <div>
                 <div>
@@ -99,6 +156,15 @@ class Login extends Component{
                         登录
                     </Button>
                  </WingBlank>
+                 <Flex>
+                    <Flex.Item>
+                        <AgreeItem data-seed="logId" defaultChecked={this.state.checkstatus} onChange={e =>{
+                            this.rememberPassWord(e)
+                        }}>
+                         记住密码
+                        </AgreeItem>
+                    </Flex.Item>
+                </Flex>
                  <div className="zhuce_area">
                     <Button
                         onClick={() => { this.props.history.push('/register') }}

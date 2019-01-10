@@ -120,8 +120,10 @@ function getUsableRoomByFloor(usableRoom) {
 }
 
 function roomSort(list) { 
-    let startlist = list;
-    
+   let finlist = list.sort(function (a,b) {
+       return b.tag.length-a.tag.length
+   })
+   return finlist
 }
 
 /**
@@ -141,12 +143,14 @@ export default async function getRecommend(allCountRoom) {
         let UsableRoomByFloor = getUsableRoomByFloor(usableRoom);
         // 第三轮打‘最近预约’标签
         let recentOrder = await getUserRecentlyOrder(UsableRoomByFloor);
-        console.log(recentOrder);
-        return recentOrder;
+        // 按标签数量排序
+        let sortOrder = roomSort(recentOrder);
+        let finalOrder = sortOrder.slice(0,6);
+        return finalOrder;
     } else {
-        let arr = [];
-        arr.push(usableRoom[0])
-        arr.push(usableRoom[2])
-        return arr;
+        //非登录状态下
+        let sortOrder = roomSort(usableRoom);
+        let finarr = sortOrder.slice(0, 2);
+        return finarr;
     }
 }

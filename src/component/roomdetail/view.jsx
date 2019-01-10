@@ -20,9 +20,9 @@ class View extends Component{
                     footer={[{ text: 'Ok', onPress: () => {this.onClose()} }]}
                     >
                     <div style={{ height: 150}}>
-                        <p><span>预约人：</span>{store.userOrderInfo.name}</p>
-                        <p><span>部门：</span>{store.userOrderInfo.department}</p>
-                        <p><span>会议主题：</span>{store.userOrderInfo.title}</p>
+                        <p><span>预约人：</span>{store.userOrderInfo.name ? store.userOrderInfo.name : ''}</p>
+                        <p><span>部门：</span>{store.userOrderInfo.department ? store.userOrderInfo.department : ''}</p>
+                        <p><span>会议主题：</span>{store.userOrderInfo.title ? store.userOrderInfo.title : ''}</p>
                     </div>
                 </Modal>
             </div>

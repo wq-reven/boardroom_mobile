@@ -46,6 +46,10 @@ export default async function request(url, method = 'GET', body = {}) {
             alert('系统错误');
             throw new Error(JSON.stringify(result));
             break;
+        case 500:
+            alert('系统错误');
+            throw new Error(JSON.stringify(result));
+            break;
         case 405:
             return result;
             break;

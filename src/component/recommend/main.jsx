@@ -2,6 +2,7 @@ import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
 import { Drawer, List, WhiteSpace, WingBlank, Card, SegmentedControl, NoticeBar, Button, Icon} from 'antd-mobile';
 import { withRouter } from "react-router-dom";
+import {formatViewData} from "../../utils/util";
 import Spin from "../layout/spin";
 import "./main.css"
 @inject('room')
@@ -14,7 +15,7 @@ class Main extends Component{
     state = {
         viewStatus: true,
     }
-    show= id => { 
+    show= id => {
         this.props.history.push(`/roomdetail/:${id}`);
     }
     onValueChange = value => {
@@ -46,14 +47,20 @@ class Main extends Component{
     onOpenChange = () =>{
         this.props.room.changeDrawerStatus(!this.props.room.drawerStatus)
     }
+    returnAttr = equipment =>{
+        const Attr = equipment.map(item=>{
+            return(
+                <span key={item}>{item}</span>
+            )
+        })
+        return Attr
+    }
     render(){
         const store = this.props.room;
         const listCard = store.roomdata.map(item => {
             return(
                 <div  key={item.roomId} className="listli">
-                    
-                    <Card 
-                        full
+                    <Card full
                         onClick={()=>{
                             this.show(item.roomId)
                         }}
@@ -63,12 +70,13 @@ class Main extends Component{
                                 <div className="roomtags">
                                     {this.renderTags(item.tag)}
                                 </div>
+                                <div className="roomproperty ">
+                                    {this.returnAttr(item.equipment)}
+                                </div>
                                 <img alt="example" src={item.url} />
                             </div>
-                            <div>
-                            </div>
                         </Card.Body>
-                        <Card.Footer style={{fontSize:12}} content={item.roomName}  extra={<div>适用{item.peopleNum}人</div>} />
+                        <Card.Footer style={{ fontSize: 12 }} content={<div>{item.roomName}</div>}  extra={<div>适用{item.peopleNum}人</div>} />
                     </Card>
                 </div>
             )
@@ -94,13 +102,11 @@ class Main extends Component{
                     />
                     </WingBlank>
                     <WhiteSpace size="lg" />
-                    <Button onClick={this.onOpenChange}>Basic</Button>
                 </div>
                 <div className="roomContent">
-                      
                     <Spin isLoading={store.isShowLoading}>
                         {listCard}
-                  </Spin> 
+                  </Spin>
                 </div>
             </div>
         )
