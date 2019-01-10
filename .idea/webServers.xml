@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="44d01e43-a2ba-439c-b4c8-6a3ee5f65616" name="te" url="http://123.207.164.37">
+        <fileTransfer host="123.207.164.37" port="22" rootFolder="/usr/local/project/boardroom_mobile" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
