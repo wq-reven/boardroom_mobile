@@ -45,7 +45,7 @@ class Main extends Component{
         }
     }
     onOpenChange = () =>{
-        this.props.room.changeDrawerStatus(!this.props.room.drawerStatus)
+       
     }
     returnAttr = equipment =>{
         const Attr = equipment.map(item=>{
@@ -89,7 +89,7 @@ class Main extends Component{
                     <h4>--推荐会议室--</h4>
                     <div className={this.state.viewStatus ? '' : 'hide'}>
                         <NoticeBar marqueeProps={{ loop: true, style: { padding: '0 7.5px' } }}>
-                        七楼第二会议室投影仪出现故障，有需要使用投影仪的同事请预约其他会议室
+                         使用会议室时请爱护器材，保持地面清洁
                         </NoticeBar>
                         <WhiteSpace />
                     </div>

@@ -9,19 +9,19 @@ import "./main.css";
 import imgstart from "./image/start.png";
 import imgfinish from "./image/finish.png";
 import imgpro from "./image/process.png";
-@inject('room')
+@inject('appo')
 @observer
 
 class Main extends Component{
     componentDidMount(){
-        this.props.room.getAppoInfoByParam();
+        this.props.appo.getAppoInfoByParam();
     }
     deleteOrder = async appoIdarr=>{
-        let res = await this.props.room.deleteAppo(appoIdarr);
+        let res = await this.props.appo.deleteAppo(appoIdarr);
         res === 'ok' ? Toast.success('删除成功！', 1) : Toast.fail('删除失败，请重试', 1);
     }
     onChange = value =>{
-        this.props.room.getAppoInfoByParam(value);
+        this.props.appo.getAppoInfoByParam(value);
     }
     viewOverdata(date, time, endtime,enddate) {
         let s_timearr = time[0].split(':');
@@ -163,7 +163,7 @@ class Main extends Component{
 
     }
     render(){
-        const store = this.props.room;
+        const store = this.props.appo;
         return(
             <div className="orderroom_main">
                

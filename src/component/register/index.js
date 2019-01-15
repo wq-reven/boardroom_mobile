@@ -65,6 +65,8 @@ class Register extends Component {
             let rex = /^[\u4e00-\u9fa5]+$/; //姓名正则
             if (!rex.test(value)) {
                  callback('error');
+            } else {
+                callback()
             }
         }
         checkPhone = (rule, value, callback) => {
@@ -125,11 +127,14 @@ class Register extends Component {
                         <InputItem
                             {...getFieldProps('name',
                                 {
+                                    initialValue: '',
+                                    validateFirst: true,
                                     rules: [{
                                             required: true,
                                         },
                                         this.checkName
                                     ],
+                                    validateTrigger: 'onChange',
                                 })
                             }
                             type="text"
@@ -196,7 +201,7 @@ class Register extends Component {
                                             },
                                             this.checkpass
                                         ],
-                                    validateTrigger: 'onBlur',
+                                    validateTrigger: 'onChange',
                                 }
                             )}
                             error = {

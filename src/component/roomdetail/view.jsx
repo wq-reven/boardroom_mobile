@@ -2,15 +2,15 @@ import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
 import { Flex, WhiteSpace,Card,Modal } from 'antd-mobile';
 import "./main.css"
-@inject('room')
+@inject('appo')
 @observer
 
 class View extends Component{
     onClose(){
-        this.props.room.changeVisible(false)
+        this.props.appo.changeVisible(false)
     }
     render(){
-        const store = this.props.room;
+        const store = this.props.appo;
         return(
             <div className="main">
                 <Modal

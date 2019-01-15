@@ -7,8 +7,9 @@ import fresh from "./image/fresh.svg";
 import Spin from "../layout/spin";
 import ClickBox from "../layout/clickBox";
 import { returnRoomPosition, renderCountEndTime } from "../../utils/util";
-@inject('room')
+@inject('appo')
 @observer
+
 
 class Main extends Component {
     state = {
@@ -19,7 +20,7 @@ class Main extends Component {
         countTitle:''
     }
     componentDidMount() {
-        this.props.room.getday();
+        this.props.appo.getday();
         //获取地址栏会议室ID
         let path_arr = window.location.pathname.split(':');
         this.setState({
@@ -34,7 +35,7 @@ class Main extends Component {
      */
     getNowAppo = roomId => {
         //根据ID查询会议室预约信息
-        this.props.room.getAppoInfo(roomId);
+        this.props.appo.getAppoInfo(roomId);
     }
     /**
      *
@@ -66,9 +67,9 @@ class Main extends Component {
      */
     getInfo = (time, date) => {
         //异步获取某一时刻预约信息
-        this.props.room.getAppoInfoByTime(this.state.roomId, date, time);
+        this.props.appo.getAppoInfoByTime(this.state.roomId, date, time);
         //改变Modal显示状态
-        this.props.room.changeVisible(true);
+        this.props.appo.changeVisible(true);
     }
     /**
      *
@@ -173,7 +174,7 @@ class Main extends Component {
      */
     submitInfo = async (title, param) => {
         //判断登录状态决定是否异步提交预约信息
-        let res = await this.props.room.addAppoInfo(param, title, this.state.roomId);
+        let res = await this.props.appo.addAppoInfo(param, title, this.state.roomId);
         if (res === 'ok') {
             Toast.success('预约成功 !!!', 1);
             this.props.history.push(`/orderroom`)
@@ -254,7 +255,7 @@ class Main extends Component {
         }
     }
     render() {
-        const store = this.props.room;
+        const store = this.props.appo;
         const timeBar = store.countTime.map(item => {
             return (
                 <li key={item.key} className="timebar">

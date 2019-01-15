@@ -12,19 +12,17 @@ const urls = {
 };
 
 class Appo {
-   
     @observable roomdata = [];
     @observable appoInfo = [];
     @observable userOrderInfo = {};
-    @observable mainType = 'recommend';
-    @observable drawerStatus = false;
     @observable viewVisible = false;
     @observable isShowLoading = false;
     @observable isselect = true;
-    @observable searchValue = {}
+    @observable searchValue = {};
     @observable sortValue = {}
     @observable myorderInfo = []
     @observable countRoomdata = []
+    @observable date = []
     @observable countTime = [{
             key: '1',
             time: "9:00"
@@ -112,7 +110,18 @@ class Appo {
     }
 
     @action.bound
-
+    changeVisible(status) {
+        this.viewVisible = status;
+    }
+    changeIsShowLoading(status) {
+        this.isShowLoading = status;
+    }
+    changeDrawerStatus(status) {
+        this.drawerStatus = status
+    }
+    changeSelectStatus(status) {
+        this.isselect = status
+    }
     /**
      *
      * 生成详情页复选框数据
@@ -171,7 +180,34 @@ class Appo {
         }
         this.countRoomdata = Alldata;
     }
-    
+    /**
+     *
+     * 生成日期数据
+     * @memberof Room
+     */
+    getday() {
+        const _week = {
+            Sunday: '日',
+            Monday: '一',
+            Tuesday: '二',
+            Wednesday: '三',
+            Thursday: '四',
+            Friday: '五',
+            Saturday: '六'
+        }
+        let date = new Date().setHours(6, 0, 0, 0);
+        let weekdate = [];
+        for (let i = 0; i < 7; i++) {
+            let day_data = {
+                value: moment(date).format('DD'),
+                day: _week[(moment(date).format('dddd'))],
+                id: i
+            }
+            weekdate.push(day_data);
+            date = date + 60 * 60 * 1000 * 24;
+        }
+        this.date = weekdate;
+    }
     /**
      *
      * 获取预约信息(我的预约页)

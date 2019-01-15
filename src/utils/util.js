@@ -171,14 +171,14 @@ export const dealCookie = {
     },
     get: function (key) { //获取cookie方法
         /*获取cookie参数*/
-        var getCookie = document.cookie.replace(/[ ]/g, ""); 
-        var arrCookie = getCookie.split(";") 
+        var getCookie = document.cookie.replace(/[ ]/g, "");
+        var arrCookie = getCookie.split(";")
         var tips; //声明变量tips
         for (var i = 0; i < arrCookie.length; i++) { //使用for循环查找cookie中的tips变量
-            var arr = arrCookie[i].split("="); 
-            if (key == arr[0]) { 
-                tips = arr[1]; 
-                break; 
+            var arr = arrCookie[i].split("=");
+            if (key == arr[0]) {
+                tips = arr[1];
+                break;
             }
         }
         return tips;
@@ -200,16 +200,15 @@ export function getUrlParam(name){
 
 /**
  * 渲染会议结束时间
- * @param {*} time 
+ * @param {*} time
  */
 export function renderCountEndTime(time) {
     let timearr = time.split(':');
     let endtime = timearr[1] === '00' ?
         timearr[0] + ':30' :
         timearr[1] === '30' ?
-        (Number(timearr[0]) + 1) + ':00' :
-        '';
+        (Number(timearr[0]) + 1) + ':00' : '';
     return endtime;
 }
-// export const APIHOST = 'http://39.105.12.145:3100/';
-export const APIHOST = 'http://192.168.4.113:3100/';
+export const APIHOST = 'http://39.105.12.145:3100/';
+// export const APIHOST = 'http://192.168.4.113:3100/';
