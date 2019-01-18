@@ -14,7 +14,13 @@ const urls = {
 class Appo {
     @observable roomdata = [];
     @observable appoInfo = [];
-    @observable userOrderInfo = {};
+    @observable userOrderInfo = {
+        name:'',
+        department:'',
+        title:'',
+        data:'',
+        appoTime:[':']
+    };
     @observable viewVisible = false;
     @observable isShowLoading = false;
     @observable isselect = true;
@@ -326,20 +332,20 @@ class Appo {
     /**
      *
      * 删除预约
-     * @param {*} appoIdarr
+     * @param {*} appoIdArr
      * @returns
      * @memberof Room
      */
-    async deleteAppo(appoIdarr) {
+    async deleteAppo(appoIdArr) {
         try {
             this.isShowLoading = true;
             let body = {
-                "appoId": appoIdarr,
+                "appoId": appoIdArr,
                 "status": "1"
             }
             let result = await request(urls.deleteAppo + `?body=${JSON.stringify(body)}`);
             if (result.ok === 1) {
-                appoIdarr.forEach(ele => {
+                appoIdArr.forEach(ele => {
                     if (this.myorderInfo.findIndex(item => item.appoId === ele) !== -1) {
                         this.myorderInfo.splice(this.myorderInfo.findIndex(item => item.appoId === ele), 1)
                     }

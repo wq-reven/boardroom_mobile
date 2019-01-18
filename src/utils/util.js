@@ -122,19 +122,6 @@ export const returnDepartment = [{
 ]
 
 export const returnFloorByDepartment = department => {
-    // let data = {
-    //     "产品研发部": 7,
-    //     "课程部": 3,
-    //     "渠道部": 3,
-    //     "简教练运营部": 3,
-    //     "简而优运营部": 3,
-    //     "智慧课堂部": 5,
-    //     "网络营销部": 3,
-    //     "综合&财商部": 5,
-    //     "简单学习网": 5,
-    //     "品牌市场部": 5
-    // }
-    // return data[department];
     let resdepartment = "";
     let data = returnDepartment;
     data.forEach(item=>{
@@ -190,7 +177,13 @@ export const dealCookie = {
     }
 }
 
-//获取地址栏参数
+/**
+ *
+ * 获取地址栏参数
+ * @export
+ * @param {*} name
+ * @returns
+ */
 export function getUrlParam(name){
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
     var r = window.location.search.substr(1).match(reg);
@@ -199,8 +192,11 @@ export function getUrlParam(name){
 }
 
 /**
+ *
  * 渲染会议结束时间
+ * @export
  * @param {*} time
+ * @returns
  */
 export function renderCountEndTime(time) {
     let timearr = time.split(':');

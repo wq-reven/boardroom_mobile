@@ -93,12 +93,6 @@ async function getUsableRoom(defaultRoom) {
             defaultRoom[j]['tag'].push('空闲');
         }
     }
-    // for (let j = 0; j < defaultRoom.length; j++) {
-    //     let result = await request(APIHOST + `appo/queryAppoInfo?body={"querys":{"roomId":"${defaultRoom[j].roomId}","date":["${date}","${date}"]},"sort":{"key":"createTime","order":"desc"},"pagination":{"current":1,"pageSize":100}}`);
-    //     if (returnUsableTag(result.docs) === 'usable') {
-    //         defaultRoom[j]['tag'].push('空闲');
-    //     }
-    // }
     return defaultRoom;
 }
 
