@@ -1,4 +1,4 @@
-import {observable,computed,action} from "mobx";
+import {observable,action} from "mobx";
 import { APIHOST} from '../utils/util';
 import request from '../utils/request';
 import md5 from "md5";

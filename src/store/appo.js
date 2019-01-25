@@ -227,7 +227,9 @@ class Appo {
             const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
             let uid = userInfo.uid;
             let result = await request(urls.getAPPOInfo + `?body={"querys":{"uid":"${uid}","title":"${title}"},"sort":{"key":"createTime","order":"desc"},"pagination":{"current":1,"pageSize":100}}`);
-            this.myorderInfo = result.docs;
+            if (result.docs.length>0) {
+                this.myorderInfo = result.docs;
+            }
         } catch (error) {
             throw error;
         } finally {
@@ -246,7 +248,11 @@ class Appo {
     async getAppoInfoByTime(roomId, date, time) {
         try {
             let result = await request(urls.getAPPOInfo + `?body={"querys":{"roomId":"${roomId}","date":["${date}","${date}"],"appoTime":"${time}"},"sort":{},"pagination":{"current":1,"pageSize":100}}`);
-            this.userOrderInfo = result.docs[0];
+            if (result.docs.length>0) {
+               this.userOrderInfo = result.docs[0];
+            } else {
+                return 'error'
+            }
         } catch (error) {
             throw error;
         } finally {
@@ -258,7 +264,7 @@ class Appo {
      * 获取预约信息（详情页）
      * @param {*} roomId
      * @memberof Room
-     */queryAppoInfoDetail
+     */
     async getAppoInfo(roomId) {
         try {
             this.isShowLoading = true;

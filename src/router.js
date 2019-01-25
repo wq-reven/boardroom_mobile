@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    BrowserRouter as Router,
-    Route,
-    Switch,
-    Redirect,
-    browserHistory
-} from 'react-router-dom';
+import {BrowserRouter as Router,Route,Switch,Redirect,browserHistory} from 'react-router-dom';
 import Recommend from './component/recommend';
 import Orderroom from './component/orderroom';
 import MyBook from "./component/mybook";

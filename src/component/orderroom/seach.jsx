@@ -1,6 +1,6 @@
 import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
-import { SearchBar, Button, WhiteSpace, WingBlank } from 'antd-mobile';
+import { SearchBar} from 'antd-mobile';
 import './search.css'
 @inject('room')
 @observer

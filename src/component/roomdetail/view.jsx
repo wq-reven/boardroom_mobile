@@ -1,6 +1,6 @@
 import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
-import { Flex, WhiteSpace,Card,Modal } from 'antd-mobile';
+import {Modal } from 'antd-mobile';
 import "./main.css";
 import {renderCountEndTime} from "../../utils/util";
 

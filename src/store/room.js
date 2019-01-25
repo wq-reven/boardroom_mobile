@@ -69,7 +69,9 @@ class Room {
             this.isShowLoading = true;
             let result = await request(urls.getRoomInfo + this.formatGetParams());
             if (this.mainType === 'all') {
-                this.roomdata = result.docs;
+                if (result.docs.length>0) {
+                    this.roomdata = result.docs;
+                }
             } else {
                 let data = await getRecommend(result.docs);
                 this.roomdata = data

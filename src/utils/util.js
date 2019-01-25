@@ -65,6 +65,8 @@ export const returnRoomPosition = roomId => {
         "702B04": "七楼第四会议室",
         "502B01": "五楼第一会议室",
         "502B02": "五楼第二会议室",
+        "502B03": "五楼第三会议室",
+        "502B04": "五楼第四会议室",
     }
     return data[roomId];
 };

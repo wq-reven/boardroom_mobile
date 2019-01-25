@@ -32,7 +32,7 @@ class Login extends Component{
         }
     }
     onPhoneChange = value => {
-        if (value.length < 11) {
+        if (value.replace(/\s/g, '').length < 11) {
             this.setState({
                 hasError: true,
             });
@@ -113,8 +113,8 @@ class Login extends Component{
                 }
                 let from = getUrlParam('from');
                 from ? this.props.history.push(from) : this.props.history.push('./mybook')
-            } 
-        } 
+            }
+        }
     }
     render(){
        const {history} = this.props;
@@ -144,11 +144,11 @@ class Login extends Component{
                         onChange={this.onPaChange}
                         value={this.state.password}
                     >密码</InputItem>
-                </List> 
+                </List>
                  <WhiteSpace size="lg" />
                  <WingBlank >
-                    <Button 
-                        size="" 
+                    <Button
+                        size=""
                         type="primary"
                         onClick={() => {
                                 this.onLogin()

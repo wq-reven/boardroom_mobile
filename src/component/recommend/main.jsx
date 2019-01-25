@@ -1,8 +1,7 @@
 import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
-import { Drawer, List, WhiteSpace, WingBlank, Card, SegmentedControl, NoticeBar, Button, Icon} from 'antd-mobile';
+import {WhiteSpace, WingBlank, Card, SegmentedControl, NoticeBar} from 'antd-mobile';
 import { withRouter } from "react-router-dom";
-import {formatViewData} from "../../utils/util";
 import Spin from "../layout/spin";
 import "./main.css"
 @inject('room')
@@ -86,7 +85,7 @@ class Main extends Component{
             <div className="main">
 
                 <div className="title">
-                    <h4>--推荐会议室--</h4>
+                    <h4>--会议室列表--</h4>
                     <div className={this.state.viewStatus ? '' : 'hide'}>
                         <NoticeBar marqueeProps={{ loop: true, style: { padding: '0 7.5px' } }}>
                          使用会议室时请爱护器材，保持地面清洁

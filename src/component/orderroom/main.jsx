@@ -2,7 +2,6 @@ import React,{ Component } from "react";
 import { observer,inject } from 'mobx-react';
 import { WingBlank, WhiteSpace,Card,Modal,SearchBar,Toast} from 'antd-mobile';
 import { withRouter } from "react-router-dom";
-import moment from "moment";
 import { formatViewData, returnRoomPosition } from "../../utils/util";
 import Spin from "../layout/spin";
 import "./main.css";

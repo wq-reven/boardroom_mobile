@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import './main.css';
 import { observer, inject } from 'mobx-react';
-import { Flex, Checkbox, WhiteSpace, WingBlank, Modal, Toast, NavBar, Icon, Popover } from "antd-mobile";
+import { Flex, WhiteSpace, WingBlank, Modal, Toast, NavBar, Icon, Popover } from "antd-mobile";
 import { withRouter } from "react-router-dom";
 import fresh from "./image/fresh.svg";
 import Spin from "../layout/spin";
@@ -17,7 +17,8 @@ class Main extends Component {
         roomId: '',
         visible: false,
         isselect:true,
-        countTitle:''
+        countTitle:'',
+        modalStatus:false
     }
     componentDidMount() {
         this.props.appo.getday();
@@ -65,11 +66,16 @@ class Main extends Component {
      * @param {*} date
      * @memberof Main
      */
-    getInfo = (time, date) => {
+    getInfo = async (time, date) => {
         //异步获取某一时刻预约信息
-        this.props.appo.getAppoInfoByTime(this.state.roomId, date, time);
-        //改变Modal显示状态
-        this.props.appo.changeVisible(true);
+       let res = await this.props.appo.getAppoInfoByTime(this.state.roomId, date, time);
+       if (res === 'error') {
+           Toast.info('预约已被删除！', 4, null, false);
+       } else {
+           //改变Modal显示状态
+           this.props.appo.changeVisible(true);
+       }
+       
     }
     /**
      *
@@ -109,8 +115,22 @@ class Main extends Component {
         }
         return findata;
     }
+    sortTime (a,b){
+        return Number(a.k_id) - Number(b.k_id)
+    }
+    getArrSort = arr =>{
+        var Arr = arr.sort(this.sortTime)
+        return Arr
+    }
+    onClose(){
+        this.setState({
+            modalStatus:false
+        })
+        window.location.reload()
+    }
     judgeorderTime(){
-        let param = this.getType(this.state.selectArr);
+        let sortresult = this.getArrSort(this.state.selectArr)
+        let param = this.getType(sortresult);
         for(let item in param){
             let ele = param[item];
             let distance = Math.abs(Number(ele.key_r[ele.key_r.length - 1]) - Number(ele.key_r[0])) + 1;
@@ -181,9 +201,11 @@ class Main extends Component {
         } else if (res === 'conflict') {
             Toast.info('您预约的时段有冲突，请刷新后重新选择！', 4, null, false);
         } else if (res === 'room') {
-            Toast.info('您在该时段已预约了其他会议室，请刷新后重新选择！', 4, null, false);
+            Toast.info('您在该时段已预约了其他会议室，请重新选择！', 4, null, false);
         } else if (res === 'user') {
-            Toast.info('您预约的时段和他人有冲突，请刷新后重新选择！', 4, null, false);
+            this.setState({
+                modalStatus: true
+            })
         } else {
             Toast.info('预约失败，请重试!!!', 2, null, false);
         }
@@ -218,7 +240,7 @@ class Main extends Component {
         this.setState({
             visible: false
         });
-        this.getNowAppo(this.state.roomId)
+        window.location.reload()
     };
     handleVisibleChange = visible => {
         this.setState({
@@ -269,7 +291,7 @@ class Main extends Component {
                     <span>
                         {item.value}
                     </span>
-                    <br />
+                    <br/>
                     <span>
                         {item.day}
                     </span>
@@ -359,6 +381,14 @@ class Main extends Component {
         const myImg = () => <img src={fresh} className="am-icon am-icon-xs" alt="" />;
         return (
             <div className="mainroom">
+                <Modal
+                    visible={this.state.modalStatus}
+                    transparent
+                    title="预约冲突"
+                    footer={[{ text: '刷新', onPress: () => { this.onClose() } }]}
+                >
+                   您预约的时段和他人有冲突，请刷新后重新选择！ 
+                </Modal>
                 <NavBar
                     mode="light"
                     icon={<Icon type="left" />}
